@@ -8,9 +8,14 @@ for extracurricular activities at Mergington High School.
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
-from pydantic import EmailStr
+from pydantic import EmailStr, ValidationError, BaseModel
+
 import os
 from pathlib import Path
+
+# Email validation model
+class EmailModel(BaseModel):
+    email: EmailStr
 
 app = FastAPI(title="Mergington High School API",
               description="API for viewing and signing up for extracurricular activities")
@@ -79,6 +84,16 @@ activities = {
 }
 
 
+def validate_email(email: str) -> str:
+    """Validate email format using pydantic EmailStr"""
+    try:
+        # Validate the email
+        validated = EmailModel(email=email)
+        return str(validated.email)
+    except ValidationError:
+        raise HTTPException(status_code=400, detail="Invalid email format")
+
+
 @app.get("/")
 def root():
     return RedirectResponse(url="/static/index.html")
@@ -92,8 +107,9 @@ def get_activities():
 @app.post("/activities/{activity_name}/signup")
 def signup_for_activity(activity_name: str, email: EmailStr = Query(...)):
     """Sign up a student for an activity"""
-    # Convert EmailStr to string for consistency with existing data
-    email_str = str(email)
+
+    # Validate email format
+    email = validate_email(email)
     
     # Validate activity exists
     if activity_name not in activities:
@@ -112,7 +128,6 @@ def signup_for_activity(activity_name: str, email: EmailStr = Query(...)):
     # Add student
     activity["participants"].append(email_str)
     return {"message": f"Signed up {email_str} for {activity_name}"}
-
 
 @app.delete("/activities/{activity_name}/unregister")
 def unregister_from_activity(activity_name: str, email: EmailStr = Query(...)):
