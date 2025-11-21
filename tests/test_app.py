@@ -25,6 +25,9 @@ def test_signup_for_activity_success():
 def test_signup_for_activity_already_signed_up():
     email = "michael@mergington.edu"
     activity = "Chess Club"
+    # Ensure the user is signed up first
+    client.post(f"/activities/{activity}/signup?email={email}")
+    # Try to sign up again, should fail
     response = client.post(f"/activities/{activity}/signup?email={email}")
     assert response.status_code == 400
     assert "Student already signed up" in response.json()["detail"]
