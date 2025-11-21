@@ -62,3 +62,21 @@ def test_unregister_activity_not_found():
     response = client.delete(f"/activities/{activity}/unregister?email={email}")
     assert response.status_code == 404
     assert "Activity not found" in response.json()["detail"]
+
+
+def test_signup_invalid_email():
+    """Test that signup rejects invalid email addresses"""
+    email = "invalid-email"
+    activity = "Chess Club"
+    response = client.post(f"/activities/{activity}/signup?email={email}")
+    assert response.status_code == 400
+    assert "Invalid email format" in response.json()["detail"]
+
+
+def test_unregister_invalid_email():
+    """Test that unregister rejects invalid email addresses"""
+    email = "not-an-email"
+    activity = "Chess Club"
+    response = client.delete(f"/activities/{activity}/unregister?email={email}")
+    assert response.status_code == 400
+    assert "Invalid email format" in response.json()["detail"]

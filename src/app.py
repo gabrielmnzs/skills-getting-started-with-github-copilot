@@ -5,9 +5,10 @@ A super simple FastAPI application that allows students to view and sign up
 for extracurricular activities at Mergington High School.
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from pydantic import EmailStr, ValidationError
 import os
 from pathlib import Path
 
@@ -78,6 +79,18 @@ activities = {
 }
 
 
+def validate_email(email: str) -> str:
+    """Validate email format using pydantic EmailStr"""
+    try:
+        # Use pydantic's EmailStr validation
+        from pydantic import TypeAdapter
+        adapter = TypeAdapter(EmailStr)
+        validated_email = adapter.validate_python(email)
+        return str(validated_email)
+    except ValidationError:
+        raise HTTPException(status_code=400, detail="Invalid email format")
+
+
 @app.get("/")
 def root():
     return RedirectResponse(url="/static/index.html")
@@ -91,6 +104,9 @@ def get_activities():
 @app.post("/activities/{activity_name}/signup")
 def signup_for_activity(activity_name: str, email: str):
     """Sign up a student for an activity"""
+    # Validate email format
+    email = validate_email(email)
+    
     # Validate activity exists
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
@@ -110,12 +126,12 @@ def signup_for_activity(activity_name: str, email: str):
     return {"message": f"Signed up {email} for {activity_name}"}
 
 
-# Endpoint to unregister a participant from an activity
-from fastapi import Query
-
 @app.delete("/activities/{activity_name}/unregister")
 def unregister_from_activity(activity_name: str, email: str = Query(...)):
     """Unregister a student from an activity"""
+    # Validate email format
+    email = validate_email(email)
+    
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
     activity = activities[activity_name]
