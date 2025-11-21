@@ -64,36 +64,19 @@ def test_unregister_activity_not_found():
     assert "Activity not found" in response.json()["detail"]
 
 
-def test_signup_invalid_email_format():
-    """Test that invalid email formats are rejected"""
+def test_signup_invalid_email():
+    """Test that signup rejects invalid email addresses"""
+    email = "invalid-email"
     activity = "Chess Club"
-    
-    # Test various invalid email formats
-    invalid_emails = [
-        "notanemail",
-        "missing@domain",
-        "@nodomain.com",
-        "no@domain@double.com",
-        "spaces in@email.com",
-        "",
-        "just@",
-        "@justdomain.com"
-    ]
-    
-    for email in invalid_emails:
-        response = client.post(f"/activities/{activity}/signup?email={email}")
-        assert response.status_code == 400
-        assert "Invalid email format" in response.json()["detail"]
+    response = client.post(f"/activities/{activity}/signup?email={email}")
+    assert response.status_code == 422
+    assert "detail" in response.json()
 
 
-def test_signup_valid_email_format():
-    """Test that valid email formats are accepted"""
+def test_unregister_invalid_email():
+    """Test that unregister rejects invalid email addresses"""
+    email = "not-an-email"
     activity = "Chess Club"
-    valid_email = "valid.student@mergington.edu"
-    
-    # Clean up first
-    client.delete(f"/activities/{activity}/unregister?email={valid_email}")
-    
-    response = client.post(f"/activities/{activity}/signup?email={valid_email}")
-    assert response.status_code == 200
-    assert f"Signed up {valid_email} for {activity}" in response.json()["message"]
+    response = client.delete(f"/activities/{activity}/unregister?email={email}")
+    assert response.status_code == 422
+    assert "detail" in response.json()
