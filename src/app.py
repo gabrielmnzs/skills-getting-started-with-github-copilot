@@ -8,7 +8,7 @@ for extracurricular activities at Mergington High School.
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
-from pydantic import EmailStr, ValidationError
+from pydantic import EmailStr, ValidationError, TypeAdapter
 import os
 from pathlib import Path
 
@@ -78,14 +78,14 @@ activities = {
     }
 }
 
+# Email validator adapter (created once for performance)
+email_adapter = TypeAdapter(EmailStr)
+
 
 def validate_email(email: str) -> str:
     """Validate email format using pydantic EmailStr"""
     try:
-        # Use pydantic's EmailStr validation
-        from pydantic import TypeAdapter
-        adapter = TypeAdapter(EmailStr)
-        validated_email = adapter.validate_python(email)
+        validated_email = email_adapter.validate_python(email)
         return str(validated_email)
     except ValidationError:
         raise HTTPException(status_code=400, detail="Invalid email format")
