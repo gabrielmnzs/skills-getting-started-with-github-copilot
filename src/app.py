@@ -90,7 +90,7 @@ def get_activities():
 
 
 @app.post("/activities/{activity_name}/signup")
-def signup_for_activity(activity_name: str, email: EmailStr):
+def signup_for_activity(activity_name: str, email: EmailStr = Query(...)):
     """Sign up a student for an activity"""
     # Convert EmailStr to string for consistency with existing data
     email_str = str(email)
