@@ -108,8 +108,8 @@ def get_activities():
 def signup_for_activity(activity_name: str, email: EmailStr = Query(...)):
     """Sign up a student for an activity"""
 
-    # Validate email format
-    email_str = validate_email(email)
+    # Convert EmailStr to string for consistency with existing data
+    email_str = str(email)
     
     # Validate activity exists
     if activity_name not in activities:
