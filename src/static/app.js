@@ -21,38 +21,64 @@ document.addEventListener("DOMContentLoaded", () => {
         const spotsLeft = details.max_participants - details.participants.length;
 
         // Participants list HTML
-        let participantsHTML = "";
+        // Build activity card content safely
+        const title = document.createElement("h4");
+        title.textContent = name;
+        activityCard.appendChild(title);
+
+        const desc = document.createElement("p");
+        desc.textContent = details.description;
+        activityCard.appendChild(desc);
+
+        const schedule = document.createElement("p");
+        const scheduleStrong = document.createElement("strong");
+        scheduleStrong.textContent = "Schedule:";
+        schedule.appendChild(scheduleStrong);
+        schedule.appendChild(document.createTextNode(" " + details.schedule));
+        activityCard.appendChild(schedule);
+
+        const availability = document.createElement("p");
+        const availabilityStrong = document.createElement("strong");
+        availabilityStrong.textContent = "Availability:";
+        availability.appendChild(availabilityStrong);
+        availability.appendChild(document.createTextNode(` ${spotsLeft} spots left`));
+        activityCard.appendChild(availability);
+
+        // Participants section
+        const participantsSection = document.createElement("div");
+        participantsSection.className = "participants-section";
+        const participantsLabel = document.createElement("strong");
+        participantsLabel.textContent = "Participants:";
+        participantsSection.appendChild(participantsLabel);
+
         if (details.participants.length > 0) {
-          participantsHTML = `
-            <div class="participants-section">
-              <strong>Participants:</strong>
-              <ul class="participants-list no-bullets">
-                ${details.participants.map(email => `
-                  <li>
-                    <span class="participant-email">${email}</span>
-                    <span class="delete-icon" title="Unregister" data-activity="${name}" data-email="${email}">&#128465;</span>
-                  </li>
-                `).join("")}
-              </ul>
-            </div>
-          `;
+          const ul = document.createElement("ul");
+          ul.className = "participants-list no-bullets";
+          details.participants.forEach(email => {
+            const li = document.createElement("li");
+            const emailSpan = document.createElement("span");
+            emailSpan.className = "participant-email";
+            emailSpan.textContent = email;
+            li.appendChild(emailSpan);
+
+            const deleteIcon = document.createElement("span");
+            deleteIcon.className = "delete-icon";
+            deleteIcon.title = "Unregister";
+            deleteIcon.setAttribute("data-activity", name);
+            deleteIcon.setAttribute("data-email", email);
+            deleteIcon.innerHTML = "&#128465;"; // Unicode trash can
+            li.appendChild(deleteIcon);
+
+            ul.appendChild(li);
+          });
+          participantsSection.appendChild(ul);
         } else {
-          participantsHTML = `
-            <div class="participants-section">
-              <strong>Participants:</strong>
-              <p class="participants-none">No participants yet.</p>
-            </div>
-          `;
+          const noneP = document.createElement("p");
+          noneP.className = "participants-none";
+          noneP.textContent = "No participants yet.";
+          participantsSection.appendChild(noneP);
         }
-
-        activityCard.innerHTML = `
-          <h4>${name}</h4>
-          <p>${details.description}</p>
-          <p><strong>Schedule:</strong> ${details.schedule}</p>
-          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
-          ${participantsHTML}
-        `;
-
+        activityCard.appendChild(participantsSection);
         activitiesList.appendChild(activityCard);
 
         // Add option to select dropdown
