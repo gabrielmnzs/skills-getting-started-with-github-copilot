@@ -8,6 +8,7 @@ for extracurricular activities at Mergington High School.
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from pydantic import EmailStr, ValidationError, BaseModel, field_validator
 import os
 from pathlib import Path
 
@@ -78,6 +79,20 @@ activities = {
 }
 
 
+def validate_email(email: str) -> str:
+    """Validate email format using pydantic EmailStr"""
+    try:
+        # Create a simple model to validate the email
+        class EmailModel(BaseModel):
+            email: EmailStr
+        
+        # Validate the email
+        validated = EmailModel(email=email)
+        return str(validated.email)
+    except ValidationError:
+        raise HTTPException(status_code=400, detail="Invalid email format")
+
+
 @app.get("/")
 def root():
     return RedirectResponse(url="/static/index.html")
@@ -91,6 +106,9 @@ def get_activities():
 @app.post("/activities/{activity_name}/signup")
 def signup_for_activity(activity_name: str, email: str):
     """Sign up a student for an activity"""
+    # Validate email format
+    email = validate_email(email)
+    
     # Validate activity exists
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
