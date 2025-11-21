@@ -8,9 +8,13 @@ for extracurricular activities at Mergington High School.
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
-from pydantic import EmailStr, ValidationError, BaseModel, field_validator
+from pydantic import EmailStr, ValidationError, BaseModel
 import os
 from pathlib import Path
+
+# Email validation model
+class EmailModel(BaseModel):
+    email: EmailStr
 
 app = FastAPI(title="Mergington High School API",
               description="API for viewing and signing up for extracurricular activities")
@@ -82,10 +86,6 @@ activities = {
 def validate_email(email: str) -> str:
     """Validate email format using pydantic EmailStr"""
     try:
-        # Create a simple model to validate the email
-        class EmailModel(BaseModel):
-            email: EmailStr
-        
         # Validate the email
         validated = EmailModel(email=email)
         return str(validated.email)
