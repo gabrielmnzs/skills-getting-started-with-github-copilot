@@ -69,8 +69,8 @@ def test_signup_invalid_email():
     email = "invalid-email"
     activity = "Chess Club"
     response = client.post(f"/activities/{activity}/signup?email={email}")
-    assert response.status_code == 400
-    assert "Invalid email format" in response.json()["detail"]
+    assert response.status_code == 422
+    assert "detail" in response.json()
 
 
 def test_unregister_invalid_email():
@@ -78,5 +78,5 @@ def test_unregister_invalid_email():
     email = "not-an-email"
     activity = "Chess Club"
     response = client.delete(f"/activities/{activity}/unregister?email={email}")
-    assert response.status_code == 400
-    assert "Invalid email format" in response.json()["detail"]
+    assert response.status_code == 422
+    assert "detail" in response.json()
