@@ -108,7 +108,7 @@ def get_activities():
 def signup_for_activity(activity_name: str, email: EmailStr = Query(...)):
     """Sign up a student for an activity"""
 
-    # Convert EmailStr to string for consistency with existing data
+    # Convert EmailStr to string for storage and comparison with participant list
     email_str = str(email)
     
     # Validate activity exists
@@ -132,7 +132,7 @@ def signup_for_activity(activity_name: str, email: EmailStr = Query(...)):
 @app.delete("/activities/{activity_name}/unregister")
 def unregister_from_activity(activity_name: str, email: EmailStr = Query(...)):
     """Unregister a student from an activity"""
-    # Convert EmailStr to string for consistency with existing data
+    # Convert EmailStr to string for storage and comparison with participant list
     email_str = str(email)
     
     if activity_name not in activities:
